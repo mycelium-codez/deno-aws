@@ -15,6 +15,11 @@ jobs:
 
       - run: deno install
       - run: deno fmt --check
-
       - run: deno lint
 #      - run: deno test
+
+  ecr-workflow:
+    uses: ./.github/workflows/ecr-workflow.yaml
+    secrets: inherit
+    with:
+      image_repository: ${{ secrets.AWS_ECR_REPOSITORY }}
