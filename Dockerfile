@@ -1,18 +1,13 @@
-FROM public.ecr.aws/lambda/provided:al2
+FROM denoland/deno:2.0.6
+COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.8.4 /lambda-adapter /opt/extensions/lambda-adapter
 
-COPY --from=denoland/deno:bin-2.0.6 /deno /usr/local/bin/deno
-
-#USER deno
-
-WORKDIR /app
-
-COPY src/ .
-COPY deno.json .
+WORKDIR /var/task
+ADD deno.json .
+ADD src/ .
 
 RUN deno install
 
 # this speeds up the invocation
 RUN deno cache index.ts
 
-ENTRYPOINT [ "$LAMBDA_RUNTIME_DIR/lambda-entrypoint.sh" ]
 CMD []
