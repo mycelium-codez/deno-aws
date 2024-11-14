@@ -12,12 +12,12 @@ on:
         description: "docker image"
         value: ${{ jobs.build-docker-image.outputs.image }}
 
-env:
-  SHA: ${{ github.sha }}
-
 permissions:
   id-token: write
   contents: read
+
+env:
+  SHA: ${{ github.sha }}
 
 jobs:
   build-docker-image:
@@ -43,17 +43,6 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-oidc-deployer-dev
           role-duration-seconds: 1200
-
-      #      - name: Assume execution role
-      #        uses: aws-actions/configure-aws-credentials@v4
-      #        with:
-      #          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-      #          aws-region: ${{ env.REGION }}
-      #          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-      #          aws-session-token: ${{ env.AWS_SESSION_TOKEN }}
-      #          role-duration-seconds: 1200
-      #          role-skip-session-tagging: true
-      #          role-to-assume: arn:aws:iam::264460841970:role/github-deployer-assumed-sharedsvc
 
       - name: Login to Amazon ECR
         id: login-ecr

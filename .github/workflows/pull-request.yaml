@@ -24,3 +24,8 @@ jobs:
     secrets: inherit
     with:
       image_repository: "deno-aws"
+
+  infra-workflow:
+    needs: ecr-workflow
+    uses: ./.github/workflows/infra-workflow.yaml
+    secrets: inherit

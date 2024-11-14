@@ -1,0 +1,46 @@
+on:
+  workflow_call:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  SHA: ${{ github.sha }}
+
+jobs:
+  build-docker-image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: checkout-code
+        uses: actions/checkout@v4
+
+      - name: Get short-sha
+        run: |
+          SHORT_SHA="${SHA:0:7}"
+          echo "SHORT_SHA: $SHORT_SHA"
+          echo "SHORT_SHA=$SHORT_SHA" >> $GITHUB_ENV
+
+      - name: Configure AWS Credentials - OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-oidc-deployer-dev
+          role-duration-seconds: 1200
+
+      - name: terraform plan
+        uses: dflook/terraform-plan@v1
+        with:
+          path: infra
+          add_github_comment: false
+          variables: |
+            git_sha = "${{ env.SHORT_SHA }}"
+
+#      - name: terraform plan
+#        uses: dflook/terraform-plan@v1
+#        with:
+#          path: infra
+#          variables: |
+#            git_sha = "${{ env.SHORT_SHA }}"

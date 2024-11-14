@@ -11,4 +11,8 @@ COPY deno.json .
 
 RUN deno install
 
+# this speeds up the invocation
+RUN deno cache index.ts
+
+ENTRYPOINT [ "$LAMBDA_RUNTIME_DIR/lambda-entrypoint.sh" ]
 CMD []
