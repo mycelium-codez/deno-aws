@@ -1,5 +1,5 @@
 {
   "imports": {
-    "aws-lambda": "npm:aws-lambda@1.0.7"
+    "hono": "npm:hono@^4.6.10"
   }
 }

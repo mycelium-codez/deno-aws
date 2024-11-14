@@ -34,7 +34,4 @@ resource "aws_lambda_function" "deno_test" {
   role          = aws_iam_role.deno_test_lambda_role.arn
   image_uri     = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/deno-aws:${var.git_sha}"
   package_type  = "Image"
-  image_config {
-    command = ["index.handler"]
-  }
 }
