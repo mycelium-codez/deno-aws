@@ -1,0 +1,14 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  ecr-workflow:
+    uses: ./.github/workflows/ecr-workflow.yaml
+    secrets: inherit
+    with:
+      image_repository: ${{ secrets.AWS_ECR_REPOSITORY  }}

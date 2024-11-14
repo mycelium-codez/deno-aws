@@ -1,0 +1,79 @@
+on:
+  workflow_call:
+    inputs:
+      image_repository:
+        type: string
+        required: true
+      image_path:
+        type: string
+        default: "."
+    outputs:
+      image:
+        description: "docker image"
+        value: ${{ jobs.build-docker-image.outputs.image }}
+
+env:
+  REGION: ${{ secrets.AWS_REGION }}
+  SHA: ${{ github.sha }}
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-docker-image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    outputs:
+      image: ${{ steps.build-image.outputs.image }}
+
+    steps:
+      - name: checkout-code
+        uses: actions/checkout@v4
+
+      - name: Get short-sha
+        run: |
+          SHORT_SHA="${SHA:0:7}"
+          echo "SHORT_SHA: $SHORT_SHA"
+          echo "SHORT_SHA=$SHORT_SHA" >> $GITHUB_ENV
+
+      - name: Configure AWS Credentials - OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-oidc-deployer-dev
+          role-duration-seconds: 1200
+
+      #      - name: Assume execution role
+      #        uses: aws-actions/configure-aws-credentials@v4
+      #        with:
+      #          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+      #          aws-region: ${{ env.REGION }}
+      #          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+      #          aws-session-token: ${{ env.AWS_SESSION_TOKEN }}
+      #          role-duration-seconds: 1200
+      #          role-skip-session-tagging: true
+      #          role-to-assume: arn:aws:iam::264460841970:role/github-deployer-assumed-sharedsvc
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ env.SHORT_SHA }}
+        run: |
+          # get image manifest - if it exists
+          MANIFEST=$(aws ecr batch-get-image --repository-name ${{ inputs.image_repository }} --image-ids imageTag=$IMAGE_TAG --output text --query 'images[].imageManifest')
+
+          # image does not exist - push the new image
+          if [ -z "${MANIFEST}" ]; then
+            docker build . -t $ECR_REGISTRY/${{ inputs.image_repository }}:$IMAGE_TAG -f ${{ inputs.image_path }}
+            docker tag $ECR_REGISTRY/${{ inputs.image_repository }}:$IMAGE_TAG $ECR_REGISTRY/${{ inputs.image_repository }}:$IMAGE_TAG
+            docker push $ECR_REGISTRY/${{ inputs.image_repository }}:$IMAGE_TAG
+          fi
+
+          echo "image=$ECR_REGISTRY/${{ inputs.image_repository }}:$IMAGE_TAG" >> $GITHUB_OUTPUT

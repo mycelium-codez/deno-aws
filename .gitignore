@@ -1,0 +1,23 @@
+node_modules/
+
+# editors
+/.idea/
+/.vs/
+/.vscode/
+
+#env config
+.env
+lib/
+.package/
+
+# MacOS generated files
+.DS_Store
+.DS_Store?
+
+/.docker_volumes
+/logs
+
+
+.turbo
+
+*.log
