@@ -6,14 +6,13 @@ on:
         required: true
       image_path:
         type: string
-        default: "."
+        default: "Dockerfile"
     outputs:
       image:
         description: "docker image"
         value: ${{ jobs.build-docker-image.outputs.image }}
 
 env:
-  REGION: ${{ secret.AWS_REGION }}
   SHA: ${{ github.sha }}
 
 permissions:
@@ -41,8 +40,8 @@ jobs:
       - name: Configure AWS Credentials - OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-region: ${{ env.REGION }}
-          role-to-assume: arn:aws:iam::${{ secret.AWS_ACCOUNT_ID }}:role/github-oidc-deployer-dev
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-oidc-deployer-dev
           role-duration-seconds: 1200
 
       #      - name: Assume execution role
