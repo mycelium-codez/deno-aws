@@ -1,0 +1,19 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  ecr-workflow:
+    uses: ./.github/workflows/ecr-workflow.yaml
+    secrets: inherit
+    with:
+      image_repository: "deno-aws"
+
+  infra-workflow:
+    needs: ecr-workflow
+    uses: ./.github/workflows/infra-workflow.yaml
+    secrets: inherit
