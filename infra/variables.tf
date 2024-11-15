@@ -4,6 +4,6 @@ variable "environment" {
 }
 
 variable "git_sha" {
-  type    = string
+  type        = string
   description = "git sha for current deployment"
 }

@@ -5,10 +5,16 @@ on:
   pull_request:
 
 jobs:
-  lint-and-build:
+  lint-and-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: terraform fmt check
+        uses: dflook/terraform-fmt-check@v1
+        with:
+          path: infra
+
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
@@ -19,7 +25,7 @@ jobs:
   #      - run: deno test
 
   ecr-workflow:
-    needs: lint-and-build
+    needs: lint-and-test
     uses: ./.github/workflows/ecr-workflow.yaml
     secrets: inherit
     with:

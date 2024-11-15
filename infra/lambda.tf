@@ -1,11 +1,3 @@
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "5.54.1"
-    }
-  }
-}
 data "aws_iam_policy_document" "assume_role" {
   statement {
     effect = "Allow"
@@ -37,6 +29,7 @@ resource "aws_lambda_function" "deno_test" {
 
 }
 
+/* generate a url for the function */
 resource "aws_lambda_function_url" "deno_test_url" {
   function_name      = aws_lambda_function.deno_test.function_name
   authorization_type = "NONE"
