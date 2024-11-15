@@ -34,4 +34,10 @@ resource "aws_lambda_function" "deno_test" {
   role          = aws_iam_role.deno_test_lambda_role.arn
   image_uri     = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/deno-aws:${var.git_sha}"
   package_type  = "Image"
+
+}
+
+resource "aws_lambda_function_url" "deno_test_url" {
+  function_name      = aws_lambda_function.deno_test.function_name
+  authorization_type = "NONE"
 }
