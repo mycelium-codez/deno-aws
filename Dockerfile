@@ -2,6 +2,7 @@ FROM denoland/deno:2.0.6
 COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.8.4 /lambda-adapter /opt/extensions/lambda-adapter
 
 ENV PORT=8080
+EXPOSE 8080
 
 WORKDIR /var/task
 ADD deno.json .
